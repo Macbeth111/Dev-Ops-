@@ -1,0 +1,137 @@
+
+SETTING UP A LAMP STACK ON UBUNTU EC2 INSTANCE
+
+Step 1: Launching an EC2 Instance
+
+    Instance Type and AMI Selection
+    Instance Naming
+
+Step 2: SSH Access to the Instance
+
+    SSH with Windows PowerShell CLI
+    SSH Issues and Resolutions
+    SSH Access via Putty
+
+Step 3: Installing Apache and Updating Firewall
+
+    Apache Installation
+    Configuring Inbound Rules for Port 80
+    Verifying Apache Installation via DNS
+
+Step 4: Installing MySQL Server
+
+    Installing MySQL
+    Setting Up MySQL Root Password
+    Testing MySQL Installation
+
+Step 5: Installing PHP
+
+    PHP Installation and Required Modules
+    Verifying PHP Installation
+
+Step 6: Creating a Virtual Host for the Website
+
+    Directory Creation for Project
+    Assigning Directory Ownership
+    Virtual Host Configuration
+    Enabling and Disabling Virtual Hosts
+    Creating a Custom HTML File
+
+Step 7: Enabling PHP on the Website
+
+    Modifying Apache Configuration to Load PHP Files
+    Creating and Testing a PHP Script
+
+---
+
+### Step 1: Launching an EC2 Instance
+The first step in setting up a LAMP stack on Ubuntu EC2 involves launching an EC2 instance. Start by choosing an instance from the t2.micro family with Ubuntu Server (HMV). Name the instance appropriately (e.g., 'learning') and select the AMI: `ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-20240801`.
+
+### Step 2: SSH Access to the Instance
+After launching the EC2 instance, access it via SSH using Windows PowerShell CLI. To do this, utilize the private key (.pem) generated during the instance setup and connect by running the SSH command along with the public IP address of the EC2 instance.
+
+Additionally, to SSH into the Ubuntu server via Putty, retrieve the server’s IP address by running `ip a`. If SSH appears inactive, perform the following to activate it:
+```
+sudo apt update
+sudo apt install openssh-server
+sudo systemctl start ssh
+sudo systemctl enable ssh
+sudo systemctl status ssh
+```
+If the issue persists, verify the installation, reinstall OpenSSH, and restart the service:
+```
+sudo apt list --installed | grep openssh-server
+sudo apt install openssh-server
+sudo systemctl restart ssh
+sudo systemctl status ssh
+```
+Once active, Putty can be used to access the server.
+
+### Step 3: Installing Apache and Updating Firewall
+Next, use Ubuntu's package manager 'apt' to install Apache:
+```
+sudo apt update
+sudo apt install apache2
+sudo systemctl status apache2
+```
+Edit the EC2 instance's inbound rules to allow HTTP requests through Port 80. Verify Apache’s functionality by running:
+```
+curl 'http://localhost:80'
+```
+
+### Step 4: Installing MySQL Server
+Install MySQL-server by running:
+```
+sudo apt install mysql-server
+sudo mysql
+```
+Then, set the root password and improve security by executing the following:
+```
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'PassWord.1';
+sudo mysql_secure_installation
+sudo mysql -p
+```
+Test the MySQL installation by logging in.
+
+### Step 5: Installing PHP
+Install PHP along with the necessary Apache and MySQL modules to complete the LAMP stack setup:
+```
+sudo apt install php libapache2-mod-php php-mysql
+php -v
+```
+This confirms that PHP is installed correctly.
+
+### Step 6: Creating a Virtual Host for the Website
+Create a project directory and assign ownership using:
+```
+mkdir /var/www/projectlamp
+sudo chown -R $USER:$USER /var/www/projectlamp
+```
+Configure Apache by creating and editing the virtual host configuration file:
+```
+sudo vim /etc/apache2/sites-available/projectlamp.conf
+sudo a2ensite projectlamp
+sudo a2dissite 000-default
+sudo apache2ctl configtest
+```
+Create a custom HTML file to display your hostname and public IP address:
+```
+sudo echo 'Hello LAMP from [Name]' $(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` && curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/public-hostname) 'with public IP' $(TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/public-ipv4) > /var/www/projectlamp/index.html
+```
+
+### Step 7: Enabling PHP on the Website
+Modify Apache’s directory index configuration to prioritize PHP files:
+```
+sudo vim /etc/apache2/mods-enabled/dir.conf
+```
+Create a PHP test script by opening and adding the following content to `index.php`:
+```
+vim /var/www/projectlamp/index.php
+```
+Content:
+```
+<?php
+phpinfo();
+?>
+```
+Test the setup by navigating to your server’s IP address followed by `/index.php`, which will display PHP information.
