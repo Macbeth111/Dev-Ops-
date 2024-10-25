@@ -94,7 +94,8 @@ https://35.87.151.65:80/
 ### Personal Notes:
 - Key actions included verifying network settings and correctly configuring the Elastic IP.
 - I learned the importance of public IP addresses for server accessibility and the need for proper security group configurations.
-
+- The decision to use Nginx as the web server was based on its high-performance capabilities and efficiency in handling large amounts of concurrent connections, making it a better choice than alternatives like Apache for this deployment. Nginx's lightweight design ensures low memory usage and scalability, ideal for a web hosting environment. Installing Nginx through Ubuntu’s package manager ensures access to the most up-to-date and reliable version. Additionally, assigning an Elastic IP to the EC2 instance ensures a static, persistent IP address, necessary for reliable web server access, especially after reboots where instances might lose their default public IP.
+- When installation issues arose, a systematic troubleshooting approach was used to diagnose the connectivity problem. After verifying that the instance lacked internet access, steps were taken to check the VPC configuration, including the subnet’s public status and its routing through an Internet Gateway. Assigning an Elastic IP and confirming the security group’s outbound rules and NACLs allowed for proper communication with external networks. This process emphasized the importance of correctly configuring AWS networking components to ensure the server was accessible over the internet.
 ---
 
 ## Step 2: Install MySQL Server
@@ -150,7 +151,7 @@ I was required to set and confirm the password for the MySQL root user, ensuring
 ### Personal Notes:
 - The importance of securing the MySQL installation was reinforced through the secure installation script and password validation settings.
 - Lessons learned included the significance of maintaining strong passwords to prevent unauthorized access.
-
+- The installation of MySQL was executed through a straightforward process using the Linux package manager apt, which ensures a stable and tested version of MySQL is installed. A key design choice here was the use of MySQL as the relational database management system, which was driven by its robustness, scalability, and wide adoption in web applications. Logging into MySQL using the sudo mysql command provided root user access, crucial for configuring the database securely and granting administrative privileges. Setting a strong root password and running the mysql_secure_installation script ensured the database was secured against unauthorized access. The choice to enable the VALIDATE PASSWORD PLUGIN adds a layer of security by enforcing stronger password policies, a necessary step to mitigate potential vulnerabilities.
 ---
 
 ## Step 3: Install PHP Server
@@ -160,7 +161,8 @@ I installed the PHP server using the command:
 ```bash
 sudo apt install php-fpm php-mysql
 ```
-
+### Personal Notes:
+- The choice to install PHP as the server-side scripting language is due to its flexibility and widespread use in web development, particularly when working with MySQL databases. Using php-fpm (FastCGI Process Manager) ensures efficient handling of dynamic content, while php-mysql allows seamless integration between PHP and MySQL. This setup enables the server to process dynamic requests such as database queries. The decision to install these packages via apt was again due to the reliability of Ubuntu’s repositories, ensuring compatibility with the system environment. The combination of PHP and MySQL is a common and proven approach for building dynamic websites that can handle various data operations.
 ---
 
 ## Step 4: Configuring Nginx to Use PHP Processor
@@ -242,7 +244,7 @@ sudo echo "Hello LEMP from hostname $(curl -H "X-aws-ec2-metadata-token: $TOKEN"
 ### Personal Notes:
 - I learned the significance of server block configurations for managing multiple domains.
 - The importance of testing configurations was highlighted through syntax checks and test files.
-
+- The configuration of Nginx to serve PHP content involved setting up server blocks to manage requests. The design choices in this step were centered on creating a well-structured environment to handle multiple domains or projects in the future. By defining a new root directory for the project and changing its ownership to the system user, the configuration ensures proper permissions and file management. The directives used, such as listen 80, server names, and root paths, were selected to define how the server should handle incoming requests and where it should serve content from. Configuring Nginx to use FastCGI for PHP processing optimizes performance, as FastCGI is designed for high-speed communication between the web server and the PHP processor. Testing the configuration through syntax checks ensured that no errors would disrupt the service.
 ---
 
 ## Step 5: Testing PHP with Nginx
@@ -265,7 +267,7 @@ http://35.87.151.65/info.php
 
 ### Personal Notes:
 - The successful output of PHP information confirmed that the PHP processor was working correctly, validating the setup.
-
+- To validate that PHP was properly configured with Nginx, I created a simple PHP file to display server information. This approach served as a troubleshooting measure to ensure PHP requests were being handled correctly by Nginx. Successfully accessing the file via a web browser confirmed that the server could process PHP files, indicating that the configuration was correct. This step was critical to ensuring that dynamic content could be served by the LEMP stack, as any misconfiguration in the PHP or Nginx setup would prevent the application from functioning properly. This basic test file is a widely used method in server environments to verify PHP functionality after installation.
 ---
 
 ## Step 6: Retrieving Data from MySQL Database with PHP
@@ -391,10 +393,10 @@ http://35.87.151.65/fetch.php
 ### Personal Notes:
 - The importance of proper user permissions was emphasized during user and privilege setup.
 - I gained valuable experience in integrating PHP with MySQL to fetch and display data.
-
+- In this step, I focused on the integration of PHP with MySQL by creating a database and connecting it to PHP. The choice to create a new user with specific privileges was a best practice for security, ensuring that the database was only accessible to authorized users. By creating a simple to-do list table, I established a basic structure for storing and retrieving data. The sample data inserted into the database was used to confirm that MySQL was functioning correctly and that the connection between PHP and the database was solid. The decision to use PDO (PHP Data Objects) for database interaction provides a flexible and secure way to manage database connections, protecting against SQL injection and ensuring compatibility with different database systems. The successful retrieval of data through a PHP script validated the seamless interaction between the server, database, and scripting language, forming the foundation of dynamic web applications.
 ---
 
-## Conclusion
+## Conclusion : Learnings and Challenges
 
 Throughout the process of implementing the LEMP stack, I gained significant insight into the critical components of Linux, Nginx, MySQL, and PHP, which form the foundation for creating a robust web server environment. I learned how to install each of these components, ensuring they work seamlessly together to deliver web applications efficiently. By starting with setting up an Ubuntu server, I developed my Linux command-line skills, followed by configuring Nginx as a web server to handle requests. Understanding how to secure the MySQL database, manage databases, and connect them to PHP was a valuable experience that reinforced my knowledge of database management and server-side scripting. The hands-on approach enabled me to troubleshoot configuration issues and deepen my understanding of server environments, which has been instrumental in developing a comprehensive view of web hosting architecture.
 However, the process was not without its challenges. One major difficulty I faced was troubleshooting server errors, particularly when services failed to run after installation. Configuring the firewall to allow HTTP/HTTPS traffic and resolving issues with PHP and MySQL connectivity required detailed research and trial and error. Despite these challenges, I employed self-study and problem-solving strategies, such as consulting online documentation and forums, to overcome them. This experience not only enhanced my technical skills but also improved my ability to work independently and resolve technical issues, thereby reinforcing my confidence in implementing complex server environments.
