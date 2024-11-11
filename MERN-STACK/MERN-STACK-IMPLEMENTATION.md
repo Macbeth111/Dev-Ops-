@@ -1,544 +1,734 @@
-
+**Title**: MERN Stack Implementation Guide
 
 ---
+
+### Table of Contents
+
+1. **Prerequisites**: Launching an EC2 Server and SSH Connection
+2. **Backend Configuration**: Update and Upgrade Ubuntu, Node.js Installation
+3. **Application Code Setup**: Creating Project Directory, Initializing npm Project
+4. **Installing Express.js**: Setting Up Server, Configuring CORS, Starting Server
+5. **Adding Routes**: API Routes for CRUD Operations in Todo App
+6. **MongoDB Setup**: Cluster and Collection Setup, Environment Variables
+7. **Testing Backend**: Using Postman for API Testing
+8. **Frontend Creation**: Creating React App, Configuring `concurrently` and `nodemon`
+9. **Proxy and Application Run**: Proxy Configuration, Running Both Servers
+10. **Creating React Components**: Input, ListTodo, and Todo Components
+11. **Styling and Integration**: Custom Styles, Integrating Components in `App.js`
+
+---
+### EC2 and SSH Connection
+
+1. **Launching an EC2 Instance**:
+   - Log in to the AWS Management Console.
+   - Go to **EC2 Dashboard** and click **Launch Instance**.
+   - Choose an Amazon Machine Image (AMI), typically an Ubuntu Server for MERN applications.
+   - Select an instance type (e.g., t2.micro for free-tier).
+   - Configure instance settings, storage, and create or select a key pair (for SSH).
+   - Review settings and launch the instance.
+
+2. **Connecting via SSH on Windows**:
+   - Open the **Command Prompt** (or use **PowerShell**).
+   - Use the SSH command to connect to your instance:
+     ```bash
+     ssh -i "your-key.pem" ubuntu@your-ec2-public-ip
+     ```
+   - Replace `"your-key.pem"` with your private key file path and `your-ec2-public-ip` with your instance’s public IP address.
+   - Accept the security prompt, and you’re connected to your EC2 instance.
+
+# Backend Configuration
+
+### Step 1: Update Ubuntu
+   - **Command**: `sudo apt update`
+   - **Explanation**: First, I updated my system’s package list. This step is important because it lets my system know about the latest versions of available packages and dependencies. By doing this, I avoid compatibility issues and ensure that I have access to the latest security patches and software improvements.
+
+### Step 2: Upgrade Ubuntu
+   - **Command**: `sudo apt upgrade`
+   - **Explanation**: Next, I upgraded all the packages to their latest versions. This is a crucial step to keep my system secure, stable, and optimized for performance. Having an up-to-date system is particularly important for a server environment, as it ensures I’m not working with outdated or vulnerable software.
+
+### Step 3: Add the Node.js Repository
+   - **Command**: `curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -`
+   - **Explanation**: I used this command to download and run a setup script from NodeSource, which adds the repository for Node.js version 18.x to my system. This step is necessary because the default Ubuntu repositories might not have the latest version of Node.js required for a MERN stack application. By adding this repository, I ensure I can install the specific version I need.
+
+### Step 4: Install Node.js
+   - **Command**: `sudo apt-get install -y nodejs`
+   - **Explanation**: After adding the repository, I installed Node.js along with npm (Node Package Manager). Node.js is a JavaScript runtime that allows me to run JavaScript on the server side, which is essential for the backend of a MERN stack application. npm, which comes with Node.js, is necessary for managing dependencies and packages, making it a critical part of my setup.
+
+### Step 5: Verify Node.js Installation
+   - **Command**: `node -v`
+   - **Explanation**: To confirm that Node.js installed successfully, I checked the version by running this command. Verifying the installation is important to ensure that I have the correct version of Node.js installed and that there were no issues during the installation process.
+
+### Step 6: Verify npm Installation
+   - **Command**: `npm -v`
+   - **Explanation**: Finally, I verified the npm installation by checking its version. This step is important because npm will be used throughout the project to install and manage various Node modules and dependencies. Confirming the version assures me that npm is ready for use in managing the backend environment effectively.
+
+![node and npm versions](https://github.com/user-attachments/assets/17274cb8-9a49-4d43-adac-ba6a4cf5f173)
+
+
+# Application Code Setup
+
+To start building my To-Do project, I set up the necessary project directory and initialized it as an npm project. Below are the steps I followed, along with explanations for each.
+
+---
+
+### Step 1: Create a New Directory
+   - **Command**: `mkdir Todo`
+   - **Explanation**: I created a new directory called `Todo` to store all the files and resources related to my project. Organizing my files within a dedicated folder makes it easier to manage and keep track of everything for this specific project.
+
+### Step 2: Verify the Directory Creation
+   - **Command**: `ls`
+   - **Explanation**: To confirm that the `Todo` directory was successfully created, I used the `ls` command to list all items in the current directory. Verifying the creation of directories and files is a good habit as it ensures each step is executed correctly.
+
+![image](https://github.com/user-attachments/assets/efbb00ce-088b-4e38-9fb0-0b77d59650f5)
+
+
+### Step 4: Change Directory to `Todo`
+   - **Command**: `cd Todo`
+   - **Explanation**: I navigated into the `Todo` directory to work within this newly created folder. Changing to the correct directory ensures that any commands I run next, such as initializing npm, will apply to this specific project folder.
+
+### Step 5: Initialize the Project with npm
+   - **Command**: `npm init`
+   - **Explanation**: I used `npm init` to initialize the project, which creates a new file named `package.json`. This file holds metadata about the project, such as its name, version, and dependencies. The prompts guided me through providing basic information, but I could accept the default values by pressing "Enter." Setting up `package.json` is essential because it enables me to manage project dependencies easily with npm.
+![image](https://github.com/user-attachments/assets/e13635e6-4638-4efd-8e30-4266d46c81cb)
+
+### Step 6: Complete `package.json` Setup
+   - **Process**: After completing the prompts, npm generated a `package.json` file with details like the project name, version, and default scripts. I confirmed the setup by typing `yes`.
+   - **Explanation**: The `package.json` file is vital for tracking project dependencies and configurations. As I add packages and dependencies, they will be recorded here, making it easier to manage the project and share it with others.
+
+---
+![image](https://github.com/user-attachments/assets/ebebcb5e-1a26-4270-bba1-1b130bcdc5f8)
+
+With these steps completed, my project is now set up with an organized directory structure and a `package.json` file, which will allow me to add dependencies and manage the project efficiently.
+
+# Installing Express.js
+
+Express.js is a powerful framework for Node.js that simplifies the development of server-side applications. By handling many low-level details for us, it allows us to focus on building features instead of handling the boilerplate code that developers would normally write.
+
+---
+
+### Step 1: Install Express.js
+   - **Command**: `npm install express`
+   - **Explanation**: I started by installing Express.js using npm. Express is essential because it allows us to set up a server, handle HTTP requests, and define routes in a straightforward way. This installation makes it available as a dependency, which is tracked in the `package.json` file.
+![image](https://github.com/user-attachments/assets/ba6d08d1-6209-43c8-ac91-e9a15f25c083)
+
+### Step 2: Create the `index.js` File
+   - **Command**: `touch index.js`
+   - **Explanation**: I created a new file named `index.js` to serve as the main entry point for my server application. This file will contain the server code for our application, which Express will use to listen for incoming requests.
+
+### Step 3: Confirm File Creation
+   - **Command**: `ls`
+   - **Explanation**: To confirm that the `index.js` file was successfully created, I used `ls` to list the files in the current directory. This ensures that the file is in place before I begin editing it.
+
+### Step 4: Install the `dotenv` Module
+   - **Command**: `npm install dotenv`
+   - **Explanation**: I installed the `dotenv` module to allow my application to load environment variables from a `.env` file. This module is important for keeping sensitive information, like API keys or port numbers, outside the codebase. It helps enhance security and makes it easier to change configurations without modifying the code.
+![image](https://github.com/user-attachments/assets/62fb47a5-39d8-4a35-aa14-3016d583d672)
+
+### Step 5: Open `index.js` for Editing
+   - **Command**: `vim index.js`
+   - **Explanation**: I opened `index.js` in the Vim text editor to add the initial server code. Editing this file allows me to define how my server should respond to requests.
+
+### Step 6: Add Server Code
+   - **Code**:
+     ```javascript
+     const express = require('express');
+     require('dotenv').config();
+
+     const app = express();
+     const port = process.env.PORT || 5000;
+
+     app.use((req, res, next) => {
+         res.header("Access-Control-Allow-Origin", "*");
+         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+         next();
+     });
+
+     app.use((req, res, next) => {
+         res.send('Welcome to Express!');
+     });
+
+     app.listen(port, () => {
+         console.log(`Server running on port ${port}`);
+     });
+     ```
+     ![image](https://github.com/user-attachments/assets/4f5e082a-f0a9-43c7-9e6a-1deb49285704)
+
+**Explanation**: In this code:
+     - I imported Express and initialized it with `const app = express()`.
+     - The `dotenv` module loads environment variables, allowing me to set the port dynamically using `process.env.PORT || 5000`.
+     - I added middleware to handle CORS (Cross-Origin Resource Sharing), which allows the server to handle requests from different origins by setting headers.
+     - I defined a basic route that responds with "Welcome to Express!" when accessed.
+     - Finally, `app.listen(port)` starts the server and listens for connections on the specified port, logging a message to confirm the server is running.
+
+### Step 7: Note on Port Configuration
+   - **Explanation**: I set the server to listen on port 5000, which will be important when I test the server in the browser or with tools like Postman. Setting the port through `process.env.PORT` allows for flexibility, as I can specify a different port without changing the code.
+
+### Step 8: Start the Server
+   - **Command**: `node index.js`
+   - **Explanation**: I start the server by running `node index.js` in the terminal. If everything is set up correctly, I should see the message `Server running on port 5000` in the terminal. This indicates that my Express application is up and listening for requests.
+
+---
+![image](https://github.com/user-attachments/assets/a04855d1-f4ec-4c66-91c1-fca2fd64ce77)
+
+### Step 9: Configure Inbound Rules on AWS EC2
+   - **Explanation**: To access the server externally, I need to allow inbound traffic on port 5000 in the EC2 Security Groups. This ensures that my server can be reached from a web browser or other clients.
+
+   - **Steps**:
+     1. In the **AWS Management Console**, I navigate to **EC2** and select **Security Groups** associated with my instance.
+     2. I click **Edit Inbound Rules** to add a new rule for port 5000.
+     3. I configure the rule as follows:
+        - **Type**: Custom TCP
+        - **Port Range**: 5000
+        - **Source**: Anywhere (0.0.0.0/0, ::/0) *(Note: For security, in production, restrict access to specific IPs)*
+        - **Description**: Allows inbound traffic on port 5000 for Express application testing.
+     4. After adding the rule, I click **Save Rules** to apply the changes.
+
+---
+![image](https://github.com/user-attachments/assets/f33a6a21-fe7f-4372-b9ed-c02c1d95114b)
+### Step 10: Access the Server in the Browser
+   - **Explanation**: Now that port 5000 is open, I can test the server by accessing it through my browser. I use my server’s public IP or DNS name followed by `:5000` to specify the port.
+
+   - **URL Format**:
+     ```
+     http://35.164.156.218:5000
+     ```
+
+   - **Expected Outcome**: When I navigate to this URL, I should see a response message, such as "Welcome to Express!" This confirms that the server is accessible and responding to requests over the internet.
+
+---
+![image](https://github.com/user-attachments/assets/40fcfd57-81a2-4fe0-822b-5ef7a73129c2)
+
+### Next Steps
+With the server running and accessible on port 5000, I’m ready to proceed with connecting Express to MongoDB and setting up additional routes and functionality. This foundational setup allows me to build out the backend components of my MERN stack application.
+
+---
+
+By following these steps, I’ve successfully set up an Express.js server that is accessible externally, laying the groundwork for further development in my MERN stack project.
+
+# Adding Routes for the To-Do Application in Express.js
+### Step 12: Create a `routes` Folder
+   - **Command**: `mkdir routes`
+   - **Explanation**: I start by creating a new directory called `routes`. This folder will contain files that define the various endpoints for the To-Do application.
+
+### Step 13: Navigate to the `routes` Directory
+   - **Command**: `cd routes`
+   - **Explanation**: After creating the `routes` directory, I navigate into it. This is where I’ll add the route definitions for handling tasks.
+
+### Step 14: Create the `api.js` File
+   - **Command**: `touch api.js`
+   - **Explanation**: I create a file named `api.js` within the `routes` directory. This file will define the API endpoints that allow users to interact with the To-Do application.
+![image](https://github.com/user-attachments/assets/57ab4016-a155-4649-aebd-8d4e2471511d)
+
+### Step 15: Open `api.js` for Editing
+   - **Command**: `vim api.js`
+   - **Explanation**: I open `api.js` in Vim to add the code that will define the routes for the application.
+   - **Code**:
+     ```javascript
+     const express = require('express');
+     const router = express.Router();
+
+     // GET route to fetch all tasks
+     router.get('/todos', (req, res, next) => {
+         // Logic to retrieve all tasks
+     });
+
+     // POST route to create a new task
+     router.post('/todos', (req, res, next) => {
+         // Logic to create a new task
+     });
+
+     // DELETE route to delete a task by ID
+     router.delete('/todos/:id', (req, res, next) => {
+         // Logic to delete a task
+     });
+
+     module.exports = router;
+     ```
+   - **Explanation**:
+     - I import Express and create a `router` instance using `express.Router()`.
+     - I define three routes:
+       - **GET** `/todos`: Retrieves all tasks.
+       - **POST** `/todos`: Creates a new task.
+       - **DELETE** `/todos/:id`: Deletes a specific task based on its ID.
+     - Each route is currently a placeholder and will need actual logic to perform the operations.
+     - Finally, I export the `router` module so it can be imported and used in the main server file.
+
+### Next Steps
+With the basic routes set up, I’m ready to move forward with adding functionality to these routes by defining models and connecting to a database. The next step involves creating a **Models** directory, where I’ll define the schema for a task to interact with the database effectively.
+
+---
+
+### Step 17: Install Mongoose
+   - **Command**: `npm install mongoose`
+   - **Explanation**: I installed Mongoose to simplify database interactions. Mongoose allows me to create schemas that outline how documents in MongoDB should be structured. It also provides a way to model data, ensuring consistency and simplifying queries.
+
+### Step 18: Create the `models` Directory
+   - **Command**: `mkdir models`
+   - **Explanation**: I created a new directory named `models`. This folder will contain files that define the data structures, or schemas, for the To-Do application's database collections.
+
+### Step 19: Navigate to the `models` Directory
+   - **Command**: `cd models`
+   - **Explanation**: After creating the `models` directory, I navigate into it to start creating the model for my application.
+
+### Step 20: Create the `todo.js` Model File
+   - **Command**: `touch todo.js`
+   - **Explanation**: I created a file named `todo.js` inside the `models` directory. This file will contain the Mongoose schema and model for each task in the To-Do application.
+![image](https://github.com/user-attachments/assets/79937b39-398d-4fe6-8798-92bc7748060e)
+
+### Step 21: Define the Task Schema in `todo.js`
+![image](https://github.com/user-attachments/assets/811b45d0-9cb9-4791-8a32-2a5a7d44f9e1)
+
+     ```
+   - **Explanation**:
+     - I imported Mongoose and created a new schema using `mongoose.Schema`.
+     - The schema `todoSchema` includes a single field, **action**, which stores the task's text. I set the `type` of this field to `String` and made it **required**, with a custom error message if left empty.
+     - I then created a model named `Todo` based on `todoSchema`. This model provides an interface to interact with the `todos` collection in MongoDB.
+     - Finally, I exported the `Todo` model so that it can be used in other parts of the application.
+
+### Step 22: Update Routes to Use the New Model
+   - **Explanation**: Now that the model is created, I need to update the routes in `api.js` to make use of this model. By integrating the `Todo` model, the routes can interact directly with the MongoDB database to create, retrieve, and delete tasks.
+![image](https://github.com/user-attachments/assets/9011cf0b-d9d2-4976-87ae-54383359b140)
+
+   - **Explanation of Updated Routes**:
+     - **GET** `/todos`: Uses `Todo.find()` to fetch all tasks from the database, returning only the `action` field for each task.
+     - **POST** `/todos`: Checks if the `action` field is provided in the request body. If present, it creates a new task in the database with `Todo.create()`. If the field is empty, it returns an error message.
+     - **DELETE** `/todos/:id`: Finds and deletes a task by its ID using `Todo.findOneAndDelete()`, allowing specific tasks to be removed from the database.
+
+---
+# MongoDB Setup for MERN Stack
+
+## Step 1: Set Up MongoDB Database
+This was straight forward:
+
+1. I Signed up on [mLab](https://www.mlab.com).
+2. Chose **AWS** as the cloud provider and select a nearby region.
+
+## Step 2: Create a Cluster
+
+1. Went to the **Clusters** section.
+2. Click **Create Cluster**.
+3. Chose the free tier options and confirm the setup.
+
+## Step 3: Allow Access from Anywhere (For Testing)
+
+1. I went to **Network Access** in the dashboard.
+2. Clicked **Add IP Address**.
+3. And Chose **Allow access from anywhere (0.0.0.0/0)**.
+
+> **Note**: This setting is only for testing and should not be used in production.
+
+## Step 4: Create a Database and Collection
+
+1. In the **Databases** section, click **Create Database**.
+2. I inserted the name of the database (SampleTodoApp) and clicked **Create**.
+3. Go to **Collections** and click **Add Collection** to create your first collection.
+![image](https://github.com/user-attachments/assets/8aeb46d5-0d8a-4caf-843c-ce577c92b1df)
+## Step 5: Set Up Environment Variables
+
+1. In the project folder, I created a file called `.env`.
+2. Then I added the MongoDB connection string in this format:
+
+   ```plaintext
+   mongodb+srv://macbeth:<Password.1>@sampletodoapp.wg4iw.mongodb.net/?retryWrites=true&w=majority&appName=SampleTodoApp
+
+
+## Step 7: Update `index.js` File to Use `.env`
+
+To connect Node.js to MongoDB using the `.env` file, follow these steps:
+
+1. I Opened the `index.js` file in the root of my project.
+2. Delete all existing content in `index.js`.
+3. Add the following code:
+
+   ```javascript
+   const express = require("express");
+   const mongoose = require("mongoose");
+   const dotenv = require("dotenv");
+   const app = express();
+
+   // Load environment variables from .env file
+   dotenv.config();
+
+   // Connect to MongoDB using the connection string from .env
+   mongoose.connect(process.env.MONGO_URI, {
+       useNewUrlParser: true,
+       useUnifiedTopology: true,
+   })
+   .then(() => console.log("Connected to MongoDB"))
+   .catch((error) => console.error("Connection error", error));
+
+   // Start the server
+   app.listen(3000, () => {
+       console.log("Server is running on port 3000");
+   });
+
+# Testing Backend with Postman in a MERN Stack Application
+
+Since we’re testing the backend of our MERN app without a frontend, we use **Postman** to make HTTP requests directly to the backend. This allows us to verify that our API endpoints work as expected.
+
+## Step 1: Set Up Postman
+
+1. I Downloaded and installed [Postman](https://www.postman.com/downloads/).
+2. Open Postman and get familiar with the interface.
 
 ```markdown
-# Setting Up a MERN Stack on Ubuntu: My Journey
+## Step 2: Test Adding a New Task with a POST Request
 
-Let me walk you through how I set up the backend environment for a MERN (MongoDB, Express.js, React, Node.js) stack on an Ubuntu server. I’ll explain each step in a way that’s easy to follow and give you insights into why each command matters.
+1. Created a new **POST** request in Postman.
+2. In the **Headers** tab, added:
+   - **Key**: `Content-Type`
+   - **Value**: `application/json`
+3. Went to the **Body** tab, selected **raw**, chose **JSON** format, and entered:
+   ```json
+   {
+       "action": "Finish project report"
+   }
+   ```
+4. Set the **URL** to the endpoint for creating tasks: `http://35.164.156.218:5000/api/todos`
 
-## Step 1: Updating and Upgrading Ubuntu
-
-The first thing I did was make sure that my system was fully updated. This is a crucial step because running the latest packages and security patches can prevent a lot of potential issues down the line.
-
-I started with the following command:
-
-```bash
-sudo apt update
-```
-
-This command updated the list of available packages from the Ubuntu repository. It doesn’t actually install or change anything yet; it’s like refreshing the software catalog so the system knows what's available.
-
-Next, I ran:
-
-```bash
-sudo apt upgrade
-```
-
-This command went ahead and upgraded all the installed packages to their latest versions. Doing this made me feel confident that I was working with the most up-to-date and secure software, which is always a good foundation.
-
-## Step 2: Installing Node.js
-
-With my system updated, it was time to install Node.js, which is essential for running JavaScript on the server. Since Node.js doesn’t always come in the latest version in Ubuntu’s default repository, I had to pull it from a special NodeSource repository.
-
-### Adding the NodeSource Repository
-
-To set this up, I used `curl` to fetch a setup script directly from NodeSource:
-
-```bash
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-```
-
-This command downloaded and executed a setup script that added the NodeSource repository to my system. Adding this repository ensured that I’d get the latest stable version of Node.js instead of an outdated version.
-
-### Installing Node.js and npm
-
-Once the repository was added, installing Node.js was straightforward. Here’s the command I used:
-
-```bash
-sudo apt-get install -y nodejs
-```
-![nodejs installed](https://github.com/user-attachments/assets/659c06bd-a6d2-46ed-aeb9-92a2fde47419)
-
-This command installed both `node` and `npm` (Node Package Manager) on my server. The `-y` flag is a little trick that automatically confirms any prompts during installation, so it saved me from having to manually confirm.
-
-At this point, I had both Node.js and `npm` installed. `npm` is especially handy because it allows me to install any additional packages and libraries I’ll need for my project, like Express.js.
-
-### Verifying the Installation
-
-After installation, I wanted to make sure everything was set up correctly. So, I checked the Node.js version with:
-
-```bash
-node -v
-```
-I also checked if the Node Packet Manager (npm) version that was instaled with the command 
-
-```bash
-npm -v
-```
-![nodejs version and installation verified ](https://github.com/user-attachments/assets/4399dbd7-b3bf-4b48-8ee1-5c9402c8db96)
-
-Seeing a version numbers pop up confirmed that Node.js and npm were successfully installed! 
+![Postman Request Example](https://github.com/user-attachments/assets/aa2b1447-c0b1-4acb-aa1c-01b9baddf1ac)
 
 ---
 
-```markdown
-## Step 3: Application Code Setup
+# Frontend Creation and Running the React App
 
-With Node.js installed, I was ready to start setting up my project files. Here’s how I created the necessary directory and initialized my project for the MERN stack.
+## Step 1: Frontend Creation
 
-### Creating a Project Directory
+With the backend setup completed for the To-Do app, the next step is to build the user interface using React. This interface will enable users to interact with the application through a browser and send requests to the backend API.
 
-First, I created a new directory for my project. Since I’m building a To-Do application, I named the folder `Todo`. Here’s the command I used:
+### 1. Creating the React App
 
+To scaffold a new React app, use the `create-react-app` tool:
 ```bash
-mkdir Todo
+npx create-react-app client
 ```
 
-This command created a folder called `Todo` where I’ll store all my project files. Having a dedicated directory keeps everything organized, especially as the project grows.
+### 2. Installing `concurrently`
 
-### Verifying the Directory Creation
-
-To make sure the directory was created, I listed all the files and folders in my current directory using:
-
+Install `concurrently` to run multiple npm commands in a single terminal:
 ```bash
-ls
+npm install concurrently --save
 ```
+**Explanation**:
+- **concurrently** allows simultaneous execution of npm commands, useful for running both the backend server and the frontend React app at the same time. This improves development efficiency by managing both processes in a single terminal.
 
-This command showed me a list of files and directories, and I could see that `Todo` was indeed there. 
+### 3. Installing `nodemon`
 
-**TIP**: If you want to see more detailed information about files and directories, you can use `ls -lih`. This version of `ls` displays properties like file size and permissions in a human-readable format. You can explore other options with `ls --help`.
-
-### Changing to the Project Directory
-
-Next, I changed my working directory to the `Todo` folder:
-
+Install `nodemon` for automatic server restarts on file changes:
 ```bash
-cd Todo
+npm install nodemon --save-dev
 ```
+**Explanation**:
+- **nodemon** automatically restarts the server when source files change, eliminating the need for manual restarts.
+- The `--save-dev` flag adds `nodemon` as a development dependency, as it's not needed in production.
 
-This command moved me into the `Todo` directory, where I’ll be working for the rest of the setup.
+## Step 2: Configuring Scripts in `package.json`
 
-### Initializing the Project with npm
+After installing the dependencies, update `package.json` to simplify the process of starting both servers:
+![package.json Configuration](https://github.com/user-attachments/assets/5a3921f0-219f-416c-8ef4-de0e2e829349)
 
-Now that I was inside my project folder, I used `npm` to initialize my project. This step creates a `package.json` file, which will store important information about my application, like its dependencies and configurations.
+## Step 3: Configuring Proxy in `package.json`
 
-Here’s the command I used:
+To ensure the React app interacts seamlessly with the backend API, configure a proxy in the frontend. This enables API calls from the frontend to the backend server without specifying the full backend URL each time.
 
+1. Navigate to the `client` directory:
+   ```bash
+   cd client
+   ```
+   **Explanation**: Changes the current directory to `client`, where the React application code is located.
+
+2. Open the `package.json` file in the client directory and add a proxy configuration:
+   ```json
+   "proxy": "http://localhost:5000"
+   ```
+   ![Proxy Configuration](https://github.com/user-attachments/assets/6050c677-8f50-461a-8433-8079b8738731)
+
+**Explanation**:
+- Adding `"proxy": "http://localhost:5000"` forwards API requests from the React app running on `localhost:3000` to the backend server on `localhost:5000`.
+- This allows the use of relative paths (e.g., `/api/todos`) in the frontend code, avoiding cross-origin issues (CORS) and simplifying code.
+
+## Step 4: Running the Application
+
+With everything configured, start the application (both backend and frontend) using the command:
 ```bash
-npm init
+npm run dev
+```
+![Running Application](https://github.com/user-attachments/assets/ae9acef2-ac6e-4c56-bbed-d6e28c7e844f)
+
+**Explanation**:
+- This command executes the `"dev"` script in `package.json`, launching both the backend server and the frontend React app concurrently.
+- Using `concurrently`, logs from both services are displayed in a single terminal, making it easier to debug and monitor.
+
+**Outcome**:
+- The backend server starts at `http://localhost:5000`, and the React frontend is accessible at `http://localhost:3000`.
+- Visiting `http://localhost:3000` in a browser allows interaction with the React app, which communicates with the backend API.
 ```
 
-Running `npm init` prompted me to enter information about my project. I could press `Enter` to accept the default values, which is a quick way to get started. At the end, it asked me to confirm by typing `yes`, which I did. Now, my project was set up with a `package.json` file, ready to have packages added to it as needed.
-![creating the package json file](https://github.com/user-attachments/assets/c639c08c-14e8-4a06-a6a1-2ca00ded0b15)
-
----
-After this, I checked to verify if the `package.json` was successfully created by listing the files in the `Todo` directory:
-```ls
-```
-![confirming package json file was created](https://github.com/user-attachments/assets/14669cc9-03f2-4a5a-85c6-c5e47e4c8625)
-
-
-At this point, I had a dedicated project folder and a `package.json` file initialized. The next steps would involve installing essential packages, setting up Express.js for the backend, and connecting to a MongoDB database. But for now, my project environment was ready to go!
-```
----
-
-Here’s a write-up in Markdown format to explain the steps involved in implementing the MERN (MongoDB, Express, React, Node.js) stack. I’ll write it in a first-person format and explain each command and code purpose.
-
----
-
-# Steps to Implement the MERN Stack
+# Creating React Components for the Todo App
 
 ## Introduction
 
-In this guide, I’ll walk you through the process of setting up the backend for a MERN stack application using Node.js and Express. Express is a framework that simplifies the development of Node.js applications by abstracting low-level details, allowing us to define application routes based on HTTP methods and URLs easily.
+In ls
+this final stage of my MERN stack application, I will create the React components needed for the Todo app. One of the strengths of React is its use of reusable and modular components, making the code cleaner and easier to maintain. For this Todo app, I will create three components:
+1. **Input.js** - A stateful component for adding new todos.
+2. **ListTodo.js** - A stateful component for displaying the list of todos.
+3. **Todo.js** - A stateless component that represents a single todo item.
 
-We’ll start by installing Express and creating a basic `index.js` file to get our server running. Additionally, we’ll use `dotenv` to manage environment variables securely.
+These components will be placed inside a new folder called `components` within the `src` directory of my React app.
 
----
+## Step 1: Navigate to the `client` Folder
 
-## Step 1: Installing Express
-
-To begin, I need to install Express, which will serve as the foundation for building our backend routes. Express allows us to handle server-side operations, such as defining API endpoints and managing requests and responses.
-
-```bash
-npm install express
-```
-
-This command installs Express in our project. With Express installed, I’ll have the tools to define and organize my routes and middleware functions.
-
----
-
-## Step 2: Creating the Entry File (`index.js`)
-
-After installing Express, I need to create a main file, `index.js`, which will be the entry point for our backend application. This file will contain the code to initialize the Express server.
+I start by navigating to the `client` directory, where the React application is located.
 
 ```bash
-touch index.js
+cd client
 ```
 
-The `touch` command creates a new file named `index.js` in the current directory. To verify that the file was successfully created, I can use the `ls` command to list all files in the directory.
+### Explanation:
+- This command changes the current directory to the `client` folder, which contains all the frontend code of the application.
 
----
+## Step 2: Navigate to the `src` Folder
 
-## Step 3: Installing dotenv
-
-To keep our sensitive information secure (such as API keys or database credentials), I’ll install the `dotenv` package. This package allows me to manage environment variables in a `.env` file, which will be loaded into our project.
+Next, I move into the `src` directory, where the main source code for the React app is located.
 
 ```bash
-npm install dotenv
+cd src
 ```
 
-The `dotenv` package makes it easy to work with environment variables, providing a safe way to keep confidential information separate from the code. We’ll load this module later in our `index.js` file to ensure that our server can access the environment variables.
+### Explanation:
+- The `src` directory is where the core components and logic of the React application are written. It contains files like `App.js`, `index.js`, and other components.
+![image](https://github.com/user-attachments/assets/144e51e3-dd24-4578-b79f-add413090d8f)
 
----
+## Step 3: Create the `components` Folder
 
-## Step 4: Opening the `index.js` File
-
-Now that I have all necessary packages, I’ll open `index.js` and start writing the code to set up the Express server. 
+To keep the code organized, I create a new folder named `components` inside the `src` directory.
 
 ```bash
-vim index.js
+mkdir components
 ```
 
-I’m using `vim` to edit `index.js`, but you can use any code editor, such as Visual Studio Code or Sublime Text, to open the file. Once open, I’ll add the required code to configure and start the Express server.
+### Explanation:
+- The `mkdir` command creates a new folder called `components`.
+- This folder will house all the React components, making the project structure clean and maintainable.
 
----
+## Step 4: Navigate to the `components` Folder
 
-Here's the updated Step 5 of the write-up, incorporating the new code from your image, along with the next steps for saving and starting the server.
-
----
-
-## Step 5: Writing the Server Code with CORS Configuration
-
-In `index.js`, I’ll set up an Express server that includes configurations for handling Cross-Origin Resource Sharing (CORS). This allows our application to manage requests from different origins, which is particularly useful if the frontend is hosted on a different domain or port.
-
-Here’s the code I’ll add to `index.js`:
-
-```javascript
-const express = require('express');
-require('dotenv').config();
-
-const app = express();
-const port = process.env.PORT || 5000;
-
-// Set up CORS headers to allow cross-origin requests
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
-
-// Define a basic route to test the server
-app.use((req, res, next) => {
-  res.send('Welcome to Express!');
-});
-
-// Start the server on the specified port
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
-```
-
-### Code Breakdown
-1. **Loading Modules**:
-   - `const express = require('express')`: Imports the Express framework.
-   - `require('dotenv').config()`: Loads environment variables from a `.env` file.
-2. **Initializing Express and Setting the Port**:
-   - `const app = express()` creates a new Express application.
-   - `const port = process.env.PORT || 5000` specifies that the server should use the port defined in `.env` or default to `5000` if none is provided.
-3. **Setting CORS Headers**:
-   - `app.use((req, res, next) => {...})` sets up headers to allow cross-origin requests by allowing any origin (`*`) and specifying acceptable request headers. This configuration is essential for enabling frontend applications hosted elsewhere to interact with the backend.
-4. **Creating a Basic Route**:
-   - `app.use((req, res, next) => { res.send('Welcome to Express!'); })` defines a route that sends a welcome message to test if the server is working correctly.
-5. **Starting the Server**:
-   - `app.listen(port, () => {...})` starts the server and listens on the specified port, logging a message to confirm the server is running.
-
----
-
-## Step 6: Saving and Exiting Vim
-
-If you’re using Vim to edit the file, you can save your changes and exit as follows:
-- Press `:w` to save your changes.
-- Then, use `:qa` to quit Vim and return to the terminal.
-
----
-
-## Step 7: Starting the Server
-
-Now it’s time to test if the server works. In the terminal, navigate to the directory where `index.js` is located, and start the server using:
+I then move into the newly created `components` directory.
 
 ```bash
-node index.js
+cd components
 ```
 
-If everything is set up correctly, you should see the following message in the terminal:
+### Explanation:
+- The `cd components` command switches the current working directory to `components`, where I will create the component files.
+
+## Step 5: Create Component Files
+
+Inside the `components` folder, I create three files: `Input.js`, `ListTodo.js`, and `Todo.js`.
 
 ```bash
-Server running on port 5000
+touch Input.js ListTodo.js Todo.js
 ```
+![image](https://github.com/user-attachments/assets/51209a03-384b-4650-b9d1-48b8438aae6b)
 
----
+### Explanation:
+- The `touch` command creates new files. In this case, I am creating three files at once:
+  - `Input.js` for handling user input.
+  - `ListTodo.js` for displaying the list of todos.
+  - `Todo.js` for representing individual todo items.
 
-Here’s the continuation of the write-up, including the steps for testing the server with the public IP address and setting up the route structure.
+## Step 6: Implementing the `Input.js` Component
 
----
-
-## Step 8: Testing the Server Using Public IP
-
-With the server running, I can test if it’s accessible from a browser. I’ll need the server’s Public IP or DNS name, especially if I’m running this on an EC2 instance.
-
-1. **Finding the Public IP or DNS Name**:
-   - I can locate this in the AWS web console under the details of my EC2 instance.
-   - Alternatively, I can use the following commands in the terminal:
-     - For Public IP: `curl -s http://169.254.169.254/latest/meta-data/public-ipv4`
-     - For Public DNS: `curl -s http://169.254.169.254/latest/meta-data/public-hostname`
-
-2. **Accessing the Server in the Browser**:
-   - In my browser, I’ll type in the server's Public IP or DNS name, followed by `:5000` to specify the port, like this:
-     ```
-     http://<PublicIP-or-PublicDNS>:5000
-     ```
-   - If everything is working correctly, I should see the message “Welcome to Express!” displayed in the browser, confirming that the server is accessible from outside.
-
----
-
-## Step 9: Defining Routes for To-Do Application
-
-Now that the server is up and accessible, I’ll begin structuring the backend for the To-Do application. There are three primary actions the application needs to support:
-
-1. **Create a New Task** – This will allow users to add new tasks to the list.
-2. **Display All Tasks** – This will display a list of all current tasks.
-3. **Delete a Completed Task** – This will remove a task once it’s completed.
-
-Each action will correspond to a specific HTTP request method:
-   - **POST** for creating new tasks,
-   - **GET** for retrieving the list of tasks, and
-   - **DELETE** for removing tasks.
-
-To organize these routes, I’ll create a `routes` folder to store route files.
-
-### Creating the Routes Folder
-
-In the terminal, I’ll run the following commands to create and navigate to the `routes` folder:
+Now, I open the `Input.js` file to define the component for adding new todos.
 
 ```bash
-mkdir routes
-cd routes
+vi Input.js
 ```
 
-This folder will house different files for each route or endpoint I need for the To-Do application.
+### Explanation:
+- This command opens the `Input.js` file in a text editor (`vi` in this case), allowing me to write the component's code.
 
----
+![image](https://github.com/user-attachments/assets/ba2c5c59-0fb2-4e4a-b70e-c9c2cda32d2a)
 
-Here's a markdown file that includes both the code and the explanations in a structured format:
+### Explanation:
+- **Imports:** 
+  - `React` and `Component` are imported to define the component.
+  - `axios` is imported for making HTTP requests to the backend API.
+- **State:** 
+  - The component has a state variable `action`, which stores the current input value from the user.
+- **addTodo Function:**
+  - This function is called when the "Add Todo" button is clicked.
+  - It checks if the input field is not empty and then sends a POST request to the backend API (`/api/todos`) to create a new todo.
+  - If the request is successful, it clears the input field and fetches the updated list of todos by calling `this.props.getTodos()`.
+- **handleChange Function:**
+  - This function updates the component's state as the user types in the input field.
+- **Render Method:**
+  - Renders an input field and a button. The input value is controlled by the component's state.
+
+## Step 7: Implementing the `ListTodo.js` Component
+
+Next, I define the `ListTodo.js` component, which will display the list of todos.
+
+### Open `ListTodo.js`:
+
+```bash
+vi ListTodo.js
+```
+
+### Code for `ListTodo.js`:
+
+![image](https://github.com/user-attachments/assets/c93b374a-6183-4e36-bba3-918daba6cac1)
+
+## Step 8: Implementing the `Todo.js` Component
+
+Lastly, I define the `Todo.js` component, which represents individual todo items.
+
+### Open `Todo.js`:
+
+```bash
+vi Todo.js
+```
+### Code for `Todo.js`:
+![image](https://github.com/user-attachments/assets/c64ddfdc-7248-4991-909d-c81404637165)
+
+### Explanation:
+- This is a simple stateless functional component that takes a `todo` prop and displays its `action` text.
+- It serves as a reusable component for rendering individual todos.
 
 ```markdown
-# MERN Stack Implementation: Setting Up Express Routes
+# Adjusting the `App.js` and `App.css` Files in the React Application
 
-In this step of setting up my MERN stack, I am focusing on creating and organizing routes for the API endpoints. This setup will allow my app to handle different types of requests in a structured and modular way, making the codebase more maintainable and easier to extend.
+Now that I have created the necessary components, the next step is to integrate them into the main application file, `App.js`. Additionally, I will make some styling adjustments in `App.css` to enhance the look and feel of the Todo app.
 
-## 1. Creating the Routes Folder
+## Step 1: Navigate to the `src` Folder
 
-First, I created a folder named `routes`, which will contain all the route definitions. This folder serves as the central place for organizing endpoint logic, particularly for handling CRUD (Create, Read, Update, Delete) operations.
+I begin by navigating back to the `src` folder where the main application files are located.
 
-```bash
-$ mkdir routes
-$ cd routes
-```
+## Step 1: Open and Edit `App.js`
 
-## 2. Creating the API File
-
-Next, I created a file named `api.js` within the `routes` folder. This file will contain the main API logic for handling requests to my application.
+Next, I open the `App.js` file using a text editor to make the necessary adjustments.
 
 ```bash
-$ touch api.js
+vi App.js
 ```
 
-Once the file was created, I opened it using a text editor to add the code for the routes.
+## Step 3: Update the `App.js` File
 
-## 3. Writing the API Code
+I replace the existing code in `App.js` with the following:
+![image](https://github.com/user-attachments/assets/b6957034-abf6-45ef-a91a-80043e9de717)
 
-In the `api.js` file, I used Express to define three primary routes for handling requests related to "to-do" items: retrieving all items, adding new items, and deleting specific items by ID. Here is the code I used:
 
-```javascript
-const express = require('express');
-const router = express.Router();
+### Explanation:
+- **Imports:**
+  - `React` is imported to use React's features and hooks.
+  - `Todo` component is imported from the `components` folder to be rendered as the main component.
+  - `./App.css` is imported for applying styles defined in the CSS file.
+- **Functional Component:**
+  - I use an arrow function to define a simple functional component, `App`.
+- **Render:**
+  - The `App` component renders a `div` with a class name "App" and includes the `Todo` component within it.
+- **Export:**
+  - Finally, I export the `App` component as the default export.
 
-// Define a route to get all "to-do" items
-router.get('/todos', (req, res, next) => {
-  // Logic for retrieving to-do items will go here
-});
+### Why This Change?
+- By including the `Todo` component directly in `App.js`, I ensure that it is the main visible component when the app loads.
+- This structure sets up the application to use the Todo feature as the central functionality.
+Then I dsaved and exited.
 
-// Define a route to add a new "to-do" item
-router.post('/todos', (req, res, next) => {
-  // Logic for adding a to-do item will go here
-});
+## Step 4: Open `App.css` for Styling
 
-// Define a route to delete a "to-do" item by ID
-router.delete('/todos/:id', (req, res, next) => {
-  // Logic for deleting a to-do item by ID will go here
-});
-
-module.exports = router;
-```
-
-### Explanation of the Code
-
-- **Importing Express and Setting Up the Router**: The first two lines import Express and create a `router` instance using `express.Router()`. This router instance allows me to modularize route handling within the `api.js` file.
-
-  ```javascript
-  const express = require('express');
-  const router = express.Router();
-  ```
-
-- **GET Route (`/todos`)**: The `router.get('/todos', ...)` route is configured to handle `GET` requests to the `/todos` endpoint. This route will be responsible for retrieving all "to-do" items from the database. In a RESTful API, `GET` requests are used to retrieve data, so it’s appropriate for fetching data here.
-
-  ```javascript
-  router.get('/todos', (req, res, next) => {
-    // Logic for retrieving to-do items will go here
-  });
-  ```
-
-- **POST Route (`/todos`)**: The `router.post('/todos', ...)` route handles `POST` requests to the `/todos` endpoint, allowing me to add new "to-do" items. In RESTful conventions, `POST` is used for creating new resources, which is why it’s ideal for adding items here.
-
-  ```javascript
-  router.post('/todos', (req, res, next) => {
-    // Logic for adding a to-do item will go here
-  });
-  ```
-
-- **DELETE Route (`/todos/:id`)**: The `router.delete('/todos/:id', ...)` route handles `DELETE` requests and uses `:id` as a route parameter to target specific "to-do" items by their unique identifier. This allows for the deletion of individual items based on the `id` provided in the request URL.
-
-  ```javascript
-  router.delete('/todos/:id', (req, res, next) => {
-    // Logic for deleting a to-do item by ID will go here
-  });
-  ```
-
-- **Exporting the Router**: Finally, I exported the router using `module.exports = router;`, making it available for import in the main server file. This modular approach keeps the project organized by separating the route definitions from other logic.
-
-  ```javascript
-  module.exports = router;
-  ```
-
-## 4. Next Steps
-
-With the routes in place, the next step is to create a `Models` directory. This directory will define the structure of the data my app will manage, further organizing the application’s code and establishing clear separation between data handling and route handling.
-
----
-
-By following this approach, I am setting up a clean, modular, and organized codebase that is easy to maintain and scalable as the application grows.
-```
-
-This markdown file format clearly documents each step, including the code segments and their explanations.
-
-Here's a first-person write-up explaining each step of setting up models in my MERN stack application, as shown in the provided image:
-
----
-
-Now that my app will use MongoDB as its database, the next step is to create a model. In JavaScript-based applications, models play a central role in making the app interactive by providing structure to the data. Here, I’m setting up models to define the database schema, which essentially serves as a blueprint for how data will be stored in MongoDB.
-
-The schema is crucial because it defines what fields and properties each MongoDB document will contain. Even though MongoDB is schema-less, using a schema helps me manage and validate data more effectively, especially when using virtual properties (additional data that doesn’t get stored in the database but is accessible within the app).
-
-To get started, I need to install **Mongoose**, a Node.js package that makes it easier to work with MongoDB by providing a straightforward way to create and manage schemas. Here’s how I went about it:
-
-### Step 1: Install Mongoose
-
-First, I navigated back to my main project folder (Todo) using the command `cd ..`. Then, I installed Mongoose with:
+Next, I open the `App.css` file to add custom styles.
 
 ```bash
-npm install mongoose
+vi App.css
 ```
+And go ahead to Update `App.css` with the Following Styles
 
-This command installs Mongoose, allowing me to set up schemas and models for MongoDB. With Mongoose, I can define schemas to structure my data, validate it, and apply different methods to interact with the database seamlessly.
+I replace the content of `App.css` with the following CSS code:
 
-### Step 2: Create the Models Folder
+```css
+.App {
+  text-align: center;
+  font-size: calc(10px + 2vmin);
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-After installing Mongoose, I created a new folder called `models` using the following command:
+input {
+  height: 40px;
+  width: 50%;
+  border: none;
+  border-bottom: 2px #101113 solid;
+  background: none;
+  font-size: 1.5em;
+  color: #787878;
+}
+
+input:focus {
+  outline: none;
+}
+
+button {
+  height: 45px;
+  width: 50px;
+  margin-left: 10px;
+  background: #101113;
+  color: #fafafa;
+  border: none;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+button:focus {
+  outline: none;
+}
+
+button:hover {
+  background: #3c3c3c;
+}
+
+p {
+  font-size: 1.5em;
+  color: #3c3c3c;
+}
+```
+![image](https://github.com/user-attachments/assets/828c58b5-caaa-4b68-ab33-c94f4d16217c)
+![image](https://github.com/user-attachments/assets/969ddfa7-d425-45f7-801e-9c97ef6ae1d4)
+
+### Explanation:
+- **.App Class:**
+  - Centers the content, sets a responsive font size, and limits the width to 50% of the viewport width for a clean look.
+- **input Styles:**
+  - Styles the input field for adding todos with a height of 40px, no border, and a solid bottom border.
+  - The `input:focus` style removes the default focus outline.
+- **button Styles:**
+  - Customizes the appearance of buttons with a dark background and white text, providing a clean and modern look.
+  - `button:hover` changes the background on hover for a better user experience.
+- **p Styles:**
+  - Sets the font size and color for paragraphs, ensuring consistency in the app's appearance.
+
+Now, I can start the React application to test the user interface and see if everything is displayed correctly. So I run
 
 ```bash
-mkdir models
+npm start
 ```
 
-This `models` folder is where I’ll keep all my models for the app. Organizing models in a separate directory keeps the project structure clean, which is especially helpful as the app grows and more models are added.
+### Final Check: Application was finally deployed successfully
+![Finally Deployed Successfully](https://github.com/user-attachments/assets/8c67d17b-6c3a-4133-a7dd-4f773dac6b8e)
 
-### Step 3: Navigate to the Models Folder and Create the Model File
+##Lessons Learned
 
-Next, I navigated into the `models` folder with `cd models` and created a file named `todo.js`:
+    Setting up a full MERN stack application provides hands-on experience with building and connecting both the frontend and backend using industry-standard tools.
+    Leveraging tools like Express, Mongoose, and Postman enhances efficiency in backend configuration and API testing.
 
-```bash
-touch todo.js
-```
+##Challenges Encountered and Solutions
 
-The `todo.js` file is where I’ll define the schema for the "to-do" items. This schema will specify what fields each to-do item will have, such as the task description, completion status, timestamps, and more. Creating this file keeps each model's logic separate from the main application logic, making it easier to maintain and update.
+    Challenge: Configuring secure access on EC2 with proper inbound rules.
+        Solution: Carefully configuring EC2 Security Groups to allow access only on necessary ports improved security while enabling remote testing.
 
-### Tip: Combining Commands
+    Challenge: Managing dependencies and environment configurations.
+        Solution: Using .env files to securely manage environment variables and tools like concurrently to streamline development processes across both servers.
 
-I learned that all three steps above can be combined into one line for convenience using the `&&` operator. Here’s what that looks like:
-
-```bash
-mkdir models && cd models && touch todo.js
-```
-
-Using `&&` allows me to execute multiple commands in sequence. This line creates the `models` folder, navigates into it, and then creates the `todo.js` file within it, all in one go.
-
----
-
-By organizing my code into models and defining a schema, I’m creating a solid foundation for managing and validating the data in my app. This setup will allow me to scale the app smoothly while keeping the codebase organized and manageable. Now, I’m ready to move on to defining the actual structure of the "to-do" schema within `todo.js`.
-
-Continuing with my MERN stack setup, I moved on to define the structure of my "to-do" data in the `todo.js` file. Here’s how I set up the schema and model for the to-do items:
-
----
-
-### Step 4: Define the Schema in `todo.js`
-
-In the `todo.js` file, I first imported Mongoose and then defined the schema for my to-do items. The code below shows how I accomplished this:
-
-```javascript
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-
-// Create schema for todo
-const TodoSchema = new Schema({
-  action: {
-    type: String,
-    required: [true, 'The todo text field is required']
-  }
-});
-
-// Create model for todo
-const Todo = mongoose.model('todo', TodoSchema);
-
-module.exports = Todo;
-```
-
-### Explanation of the Code
-
-- **Importing Mongoose and Schema**: First, I imported Mongoose and extracted `Schema` from it. The `Schema` object allows me to define the structure of each to-do item in a controlled way, setting requirements and data types.
-
-  ```javascript
-  const mongoose = require('mongoose');
-  const Schema = mongoose.Schema;
-  ```
-
-- **Defining the TodoSchema**: Using `new Schema`, I created `TodoSchema`, which specifies the structure for each to-do item. In this schema, I defined an `action` field, which represents the actual to-do text. I set it as a string and made it a required field with a custom error message to ensure every to-do item has content.
-
-  ```javascript
-  const TodoSchema = new Schema({
-    action: {
-      type: String,
-      required: [true, 'The todo text field is required']
-    }
-  });
-  ```
-
-  The `required` option ensures that any to-do item saved to the database must have text in the `action` field. This requirement helps maintain data integrity by preventing empty to-do items from being added.
-
-- **Creating the Model**: With the schema in place, I used `mongoose.model()` to create a model named `Todo`, passing in the schema (`TodoSchema`). This model acts as a constructor for to-do items, allowing me to interact with to-do data in the database, like adding, updating, or deleting items.
-
-  ```javascript
-  const Todo = mongoose.model('todo', TodoSchema);
-  ```
-
-  By creating this model, I’m making it easy to perform database operations on the "to-do" collection without writing raw MongoDB commands. This is a key advantage of using Mongoose, as it streamlines database interactions and reduces the chances of errors.
-
-- **Exporting the Model**: Finally, I exported the `Todo` model with `module.exports`. Exporting the model allows me to import and use it in other files, such as when defining routes in `api.js`.
-
-  ```javascript
-  module.exports = Todo;
-  ```
-
----
-
-Now that the model is set up, the next step is to update the `api.js` file in the `routes` directory to use this model. This will enable my routes to create, retrieve, and delete to-do items in the database, making the app fully functional for managing tasks.
+    Challenge: Cross-Origin Resource Sharing (CORS) issues during frontend-backend communication.
+        Solution: Adding CORS headers in the Express backend resolved errors, allowing the React frontend to communicate with the backend securely.
