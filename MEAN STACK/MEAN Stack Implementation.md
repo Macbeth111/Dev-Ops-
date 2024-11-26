@@ -6,6 +6,10 @@
 3. **Implementation Process**  
 4. **Lessons Learned, Challenges Faced**  
 
+## Initiate Ec2-Instance connect
+I used Ec2-instance connect for this procedure.
+![001 Conected to CLI](https://github.com/user-attachments/assets/87b9945d-db18-4ddf-a9b2-3bebc37b6be3)
+
 ## Step 1: Install Node.js
 
 Node.js is a JavaScript runtime built on Chrome's V8 engine. It’s a crucial component of the MEAN stack because it lets me run JavaScript code on the server. I’ll also use it as the foundation for Express.js, which will help me create APIs and web applications.
