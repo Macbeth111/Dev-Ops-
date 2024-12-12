@@ -1,6 +1,6 @@
 # Setting Up a Client-Server Architecture with MySQL
 
-This guide outlines the step-by-step process of setting up a client-server architecture using MySQL. Each step highlights its importance and provides instructions in first person to help you follow along.
+This guide outlines the step-by-step process of setting up a client-server architecture using MySQL. Each step highlights its importance. 
 
 ---
 
