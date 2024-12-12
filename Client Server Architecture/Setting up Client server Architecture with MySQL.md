@@ -35,8 +35,6 @@ After installing the MySQL server, I run the following command to secure the ins
 ```bash
 sudo mysql_secure_installation
 ```
-![mysql client installed](https://github.com/user-attachments/assets/3943f678-a80d-40bb-ada0-616fdd071911)
-
 Then I went ahead to set root password for Mysql using
 ```bash
 sudo mysql -u root -p
