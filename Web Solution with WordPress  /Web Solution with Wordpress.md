@@ -553,6 +553,11 @@ To finalize the setup, I ensure that Apache is properly configured to use WordPr
 
 # Step 22 — Enable Web Access to the WordPress Site
 
+## Allocating Elastic Ip to Web-Server Instance:
+I had to allocate elastic IP to my webserver instance because the public IP was not working properly.
+
+![elastic ip](https://github.com/user-attachments/assets/a00a429f-a9f6-4696-ace3-ee9ea1edcb67)
+
 ## Editing Inbound Rules
 To allow external access to my server, I edited the inbound rules of my EC2 instance. 
 I ensured that traffic on port 80, which is used for HTTP, was permitted. This is crucial for allowing users to access the WordPress site via their browsers.
