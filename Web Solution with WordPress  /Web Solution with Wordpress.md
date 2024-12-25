@@ -621,8 +621,18 @@ Finally I was successful
 # Challenges Faced and Resolutions in Setting Up WordPress Web Solution
 
 ## Challenges Encountered
-During the setup of the web solution using WordPress, several challenges were encountered. Firstly, while attaching the Elastic Block Storage (EBS) volumes to the EC2 instances, mapping the correct device names (`/dev/xvdf`, `/dev/xvdg`, etc.) to the appropriate volumes was confusing and time-consuming. Missteps in this process led to failed recognitions by the EC2 instance during the initial configuration stages. Another significant hurdle arose while creating logical volumes using the `lvm2` package. Incorrect partitioning of the disks and minor syntax errors in the Logical Volume Manager (LVM) commands caused delays and required additional troubleshooting. Furthermore, formatting and mounting logical volumes posed challenges as the ext4 filesystem setup needed to be verified multiple times to ensure correctness. Lastly, while automating the mounting of volumes using the `/etc/fstab` file, there were instances of invalid UUID entries that resulted in mounting failures after system reboots.
+During the setup of the web solution using WordPress, several challenges were encountered.
+Firstly, while attaching the Elastic Block Storage (EBS) volumes to the EC2 instances, mapping the correct device names (`/dev/xvdbb`, `/dev/xvdbc`, etc.) to the appropriate volumes was confusing and time-consuming.
+ Missteps in this process led to failed recognitions by the EC2 instance during the initial configuration stages.
+Another significant hurdle arose while creating logical volumes using the `lvm2` package. Incorrect partitioning of the disks and minor syntax errors in the Logical Volume Manager (LVM) commands caused delays and required additional troubleshooting.
+Furthermore, formatting and mounting logical volumes posed challenges as the ext4 filesystem setup needed to be verified multiple times to ensure correctness.
+Lastly, while automating the mounting of volumes using the `/etc/fstab` file, there were instances of invalid UUID entries that resulted in mounting failures after system reboots.
 
 ## Resolutions Implemented
-To address these challenges, a systematic approach was adopted. During volume attachment, careful documentation of device names and their respective EBS volumes ensured accurate mapping, while the use of `lsblk` and `df -h` commands verified successful attachments. For the LVM setup, repetitive errors were resolved by meticulously following LVM guidelines, and commands were validated using tools such as `pvscan`, `vgscan`, and `lvscan`. Logical volume formatting and mounting were streamlined by referencing filesystem compatibility issues and verifying configurations with `blkid` and `mount` commands. The `/etc/fstab` file issue was resolved by retrieving and cross-checking UUIDs through `sudo blkid`, and configurations were tested using `sudo mount -a` before restarting the system. These resolutions ensured the smooth completion of the setup and highlighted the importance of careful planning and validation at each step.
+To address these challenges, a systematic approach was adopted.
+During volume attachment, careful documentation of device names and their respective EBS volumes ensured accurate mapping, while the use of `lsblk` and `df -h` commands verified successful attachments.
+For the LVM setup, repetitive errors were resolved by meticulously following LVM guidelines, and commands were validated using tools such as `pvscan`, `vgscan`, and `lvscan`.
+Logical volume formatting and mounting were streamlined by referencing filesystem compatibility issues and verifying configurations with `blkid` and `mount` commands.
+The `/etc/fstab` file issue was resolved by retrieving and cross-checking UUIDs through `sudo blkid`, and configurations were tested using `sudo mount -a` before restarting the system.
+These resolutions ensured the smooth completion of the setup and highlighted the importance of careful planning and validation at each step.
 ```
