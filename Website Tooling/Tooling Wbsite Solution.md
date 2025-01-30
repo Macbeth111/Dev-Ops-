@@ -58,8 +58,6 @@ To begin, I launched the necessary AWS EC2 instances following these steps:
 - Added descriptive tags such as `NFS Server`, `Web Server 1`, `DB Server`.
 - Marked the environment as `Learning/Development` for clarity.
 
-### 6. Configuring Elastic IPs (Optional):
-- Allocated and associated **Elastic IPs** to the web servers for public access if required.
 
 ### **Important Considerations:**
 - All instances were deployed within **the same VPC and subnet** for simplicity, but in production, they should be separated for security.
@@ -68,6 +66,8 @@ To begin, I launched the necessary AWS EC2 instances following these steps:
 
 > **Note:** In a production environment, it is best practice to separate web, application, and database servers into different subnets (e.g., public subnet for web servers, private subnet for databases) to enhance security through network segregation.
 
+> **Note:** You must create volumes for the NFS and Database server and attach them to the instances respectively
+![IMG-20250130-WA0002](https://github.com/user-attachments/assets/b19879cd-2138-498a-a1fc-b77f9783d678)
 ---
 
 ## Configuring NFS Server
@@ -84,6 +84,7 @@ To confirm that the EBS volumes were correctly attached, I listed the block devi
 lsblk
 ```
 The output showed the new volumes as `/dev/xvdb`, `/dev/xvdc`, and `/dev/xvdd`.
+![lsblk 1](https://github.com/user-attachments/assets/4e62dd3d-f8a7-44ef-905b-6410c6a87699)
 
 ### LVM Configuration
 I installed LVM and other necessary tools:
@@ -91,14 +92,14 @@ I installed LVM and other necessary tools:
 sudo dnf update -y
 sudo dnf install lvm2 nano -y
 ```
-Since these were new volumes, no partitions were present initially.
-
 #### Creating Partitions on EBS Volumes
 I used `gdisk` to create partitions on each block:
 ```bash
 sudo gdisk /dev/xvdb
 ```
-Inside the `gdisk` interface, I ran:
+![Partition](https://github.com/user-attachments/assets/67e58706-c992-4c2e-8e7c-89420836b63e)
+Inside the `gdisk` interface,
+ I ran:
 - `n` - Create a new partition
 - `p` - Print the partition table
 - `w` - Write changes to disk
@@ -110,13 +111,11 @@ I initialized the partitions as physical volumes:
 ```bash
 sudo pvcreate /dev/xvdb1 /dev/xvdc1 /dev/xvdd1
 ```
-
 #### Creating a Volume Group
 I aggregated the physical volumes into a single **volume group**:
 ```bash
 sudo vgcreate webdata-vg /dev/xvdb1 /dev/xvdc1 /dev/xvdd1
 ```
-
 #### Creating Logical Volumes
 I created separate logical volumes (LVs) for applications, logs, and Jenkins:
 ```bash
@@ -128,6 +127,7 @@ To verify:
 ```bash
 lsblk
 ```
+![all volumes created](https://github.com/user-attachments/assets/039251dc-decd-4957-a921-37ef18028371)
 
 #### Creating File System and Mount Points
 I formatted the logical volumes using **XFS**:
@@ -136,6 +136,7 @@ sudo mkfs -t xfs /dev/webdata-vg/lv-apps
 sudo mkfs -t xfs /dev/webdata-vg/lv-logs
 sudo mkfs -t xfs /dev/webdata-vg/lv-opt
 ```
+![File system and mount point](https://github.com/user-attachments/assets/1b48db88-6b2a-4c17-ba1e-85da5104214d)
 
 Then, I created mount points:
 ```bash
@@ -149,11 +150,12 @@ sudo dnf install nfs-utils -y
 sudo systemctl start nfs-server
 sudo systemctl enable nfs-server
 ```
+![NFS status](https://github.com/user-attachments/assets/7fcf2095-02dc-4289-8871-8a2dbf5d5ff7)
 
 #### Configuring NFS Access
 I modified the **exports file** to allow access within the subnet:
 ```bash
-sudo nano /etc/exports
+sudo vi /etc/exports
 ```
 Added the following:
 ```bash
@@ -165,12 +167,17 @@ Applied the configuration:
 ```bash
 sudo exportfs -arv
 ```
+![exports vi edited](https://github.com/user-attachments/assets/63827469-6747-4942-97ed-d05e903042e2)
 
 Checked the **NFS Server Port**:
 ```bash
 rpcinfo -p | grep nfs
 ```
----
+![nfs port checked](https://github.com/user-attachments/assets/fe66d0d9-90da-4583-8f80-ebc7b3a94401)
+
+Then I went ahead and edited the inbound rules for the 'NFS server'
+
+![IMG-20250130-WA0001](https://github.com/user-attachments/assets/a68f61aa-7849-4d62-8f46-58f331dd64e4)
 
 # Configuring Database Server
 
@@ -185,6 +192,8 @@ rpcinfo -p | grep nfs
 ```bash
 lsblk
 ```
+![db lsblk](https://github.com/user-attachments/assets/182076aa-5697-4046-afb2-e7a88aebc2cc)
+
 #### Significance:
 - Lists all attached block devices, including newly attached EBS volumes.
 - Helps identify device names like `/dev/xvdb`, `/dev/xvdc`, and `/dev/xvdd`.
@@ -229,11 +238,11 @@ Repeat the process for other EBS blocks:
 sudo gdisk /dev/xvdc
 sudo gdisk /dev/xvdd
 ```
-
 ### Confirm Partition Creation:
 ```bash
 lsblk
 ```
+![db partitions confirmed](https://github.com/user-attachments/assets/41126d8b-4048-46d1-8e9a-bf378164b34e)
 #### Significance:
 - Verifies that partitions (`xvdb1`, `xvdc1`, `xvdd1`) have been successfully created.
 
@@ -256,6 +265,8 @@ sudo vgcreate dbdata-vg /dev/xvdb1 /dev/xvdc1 /dev/xvdd1
 sudo lvcreate -n db-lv -L 14G dbdata-vg
 sudo lvcreate -n log-lv -L 14G dbdata-vg
 ```
+![db lv created](https://github.com/user-attachments/assets/3da2793d-1591-478d-8494-b9f8e0cf4d81)
+
 #### Significance:
 - `db-lv`: Logical volume for database storage.
 - `log-lv`: Logical volume for system logs.
@@ -264,6 +275,10 @@ sudo lvcreate -n log-lv -L 14G dbdata-vg
 ```bash
 sudo vgdisplay -v
 ```
+![IMG-20250130-WA0028](https://github.com/user-attachments/assets/579b91ce-050f-4478-be69-008361588611)
+
+![IMG-20250130-WA0030](https://github.com/user-attachments/assets/67baa961-4670-4e63-a251-21d04f05f5b8)
+
 #### Significance:
 - Displays details of volume groups, physical volumes, and logical volumes.
 
@@ -274,6 +289,8 @@ sudo vgdisplay -v
 sudo mkfs -t ext4 /dev/dbdata-vg/db-lv
 sudo mkfs -t ext4 /dev/dbdata-vg/log-lv
 ```
+![db ext4](https://github.com/user-attachments/assets/2c720bd4-0061-4565-8788-20faa3d4005d)
+
 #### Significance:
 - `mkfs -t ext4`: Creates an ext4 filesystem on logical volumes for data storage.
 
@@ -315,18 +332,19 @@ sudo rsync -av /home/recovery/logs/ /var/log/
 ```bash
 sudo blkid
 ```
+![sudo blkid db](https://github.com/user-attachments/assets/f5ed63db-c68b-4560-a5ea-8fbd8715ef06)
+
 #### Significance:
 - Retrieves UUIDs (unique identifiers) for disk partitions, ensuring correct mounting.
 
 ### Edit `/etc/fstab` for Persistent Mounting:
 ```bash
-sudo nano /etc/fstab
+sudo vi /etc/fstab
 ```
 **Add the following entries:**
-```bash
-UUID=ac925709-a000-4cb5-926d-bc9c792c499c /db ext4 defaults 0 0
-UUID=44d455e2-38ff-414e-839e-39110887379d /var/log ext4 defaults 0 0
-```
+
+![db UUIDs](https://github.com/user-attachments/assets/99eb2fdc-e860-46ed-a3da-07d4ef63224c)
+
 #### Significance:
 - Ensures the storage volumes are mounted automatically on system boot.
 
@@ -335,6 +353,8 @@ UUID=44d455e2-38ff-414e-839e-39110887379d /var/log ext4 defaults 0 0
 sudo systemctl daemon-reload
 sudo mount -a
 ```
+![db mount a](https://github.com/user-attachments/assets/16bfbc45-3377-4b8d-a65b-3c6bbdea94a4)
+
 #### Significance:
 - Reloads system services to apply changes.
 - `mount -a`: Tests if all entries in `/etc/fstab` mount correctly.
@@ -343,7 +363,8 @@ sudo mount -a
 
 ### MySQL Security Group Settings:
 - **Port 3306:** Allows MySQL traffic from the subnet (172.31.0.0/20).
-- **Port 22:** Enables SSH access for remote administration.
+
+![IMG-20250130-WA0025](https://github.com/user-attachments/assets/8439a05c-db08-47fe-b159-ac5801f83e26)
 
 ## 7. Install and Configure MySQL Database Server
 
@@ -352,14 +373,14 @@ sudo mount -a
 sudo dnf update
 sudo dnf install mysql-server -y
 ```
-#### Significance:
-- Installs MySQL, the database engine for WordPress.
-
 ### Start and Enable MySQL Service:
 ```bash
 sudo systemctl start mysqld
 sudo systemctl enable mysqld
+sudo systemctl status mysqld
 ```
+![IMG-20250130-WA0021](https://github.com/user-attachments/assets/1df16261-3c50-4a66-ac32-d979e0f60401)
+
 #### Significance:
 - Ensures MySQL starts automatically on boot.
 
@@ -374,8 +395,8 @@ sudo mysql_secure_installation
 ```bash
 sudo mysql -u root -p
 CREATE DATABASE tooling;
-CREATE USER 'webaccess'@'172.31.%' IDENTIFIED WITH mysql_native_password BY 'Password.1';
-GRANT ALL PRIVILEGES ON tooling.* TO 'webaccess'@'172.31.%';
+CREATE USER 'webaccess'@'172.31.45.61' IDENTIFIED WITH mysql_native_password BY 'Password.1';
+GRANT ALL PRIVILEGES ON tooling.* TO 'webaccess'@'172.31.45.61';
 FLUSH PRIVILEGES;
 EXIT;
 ```
@@ -390,11 +411,12 @@ EXIT;
 sudo dnf update
 sudo dnf install mysql nano
 ```
-
 ### Connect to Remote MySQL Server:
 ```bash
-sudo mysql -h 172.31.3.89 -u webaccess -p
+sudo mysql -h 172.31.45.189 -u webaccess -p
 ```
+![IMG-20250130-WA0056](https://github.com/user-attachments/assets/b3e596c8-a25a-4e8f-ac18-a52e6b3a8575)
+
 #### Significance:
 - Ensures WordPress can connect to MySQL from a separate instance.
 - If successful, the database setup is complete.
@@ -402,11 +424,6 @@ sudo mysql -h 172.31.3.89 -u webaccess -p
 ---
 
 # Configuring Web Servers
-
-## Overview
-We will be configuring three web servers for NFS server connection and installing both Apache and PHP on them. This setup ensures that our application can handle HTTP requests efficiently while maintaining a centralized storage solution with NFS.
-
----
 
 ## Installing NFS Client
 
@@ -417,7 +434,6 @@ The NFS client is required to enable the web servers to access shared storage fr
 sudo dnf install nfs-utils nfs4-acl-tools -y
 sudo dnf install httpd git
 ```
-
 - `nfs-utils`: Provides the necessary utilities for mounting and managing NFS shares.
 - `nfs4-acl-tools`: Helps manage ACLs (Access Control Lists) on NFS shares.
 - `httpd`: Installs Apache, the most commonly used web server for WordPress and PHP applications.
@@ -499,12 +515,6 @@ sudo mount -a
 
 ```bash
 cat /etc/redhat-release
-```
-
-Expected Output:
-
-```
-Red Hat Enterprise Linux release 9.4 (Plow)
 ```
 
 ### Step 2: Enable Necessary Repositories
