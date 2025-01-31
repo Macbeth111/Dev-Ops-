@@ -18,7 +18,7 @@
     - [Mounting NFS Shares](#mounting-nfs-shares)
     - [Installing PHP and Extensions](#installing-php-and-extensions)
 6. [Deploying Tooling Website](#deploying-tooling-website)
-7. [Final Steps and Reflections](#final-steps-and-reflections)
+
 
 ---
 
@@ -53,11 +53,12 @@ To begin, I launched the necessary AWS EC2 instances following these steps:
 - Ensured that all instances were in a "running" state.
 - Noted down the **private IP addresses** of all instances for configuration.
 - Confirmed that all instances were in the same subnet.
+  
+![IMG-20250131-WA0006](https://github.com/user-attachments/assets/ff209b88-d6cd-41cb-90e8-a28db7da508d)
 
 ### 5. Tagging Instances:
 - Added descriptive tags such as `NFS Server`, `Web Server 1`, `DB Server`.
 - Marked the environment as `Learning/Development` for clarity.
-
 
 ### **Important Considerations:**
 - All instances were deployed within **the same VPC and subnet** for simplicity, but in production, they should be separated for security.
@@ -416,6 +417,7 @@ sudo dnf install mysql nano
 sudo mysql -h 172.31.45.189 -u webaccess -p
 ```
 ![IMG-20250130-WA0056](https://github.com/user-attachments/assets/b3e596c8-a25a-4e8f-ac18-a52e6b3a8575)
+![IMG-20250131-WA0002](https://github.com/user-attachments/assets/c0c196f5-9511-4830-a0ba-a97b805f8a86)
 
 #### Significance:
 - Ensures WordPress can connect to MySQL from a separate instance.
@@ -470,7 +472,7 @@ If configured correctly, the default RedHat page should be displayed.
 ### Step 1: Mount `/var/www/` and Target the NFS Server
 
 ```bash
-sudo mount -t nfs -o rw,nosuid 172.31.1.101:/mnt/apps /var/www
+sudo mount -t nfs -o rw,nosuid 172.31.42.162:/mnt/apps /var/www
 ```
 
 - `mount`: Command to mount a file system.
@@ -486,6 +488,7 @@ sudo mount -t nfs -o rw,nosuid 172.31.1.101:/mnt/apps /var/www
 ```bash
 df -h
 ```
+![IMG-20250130-WA0026](https://github.com/user-attachments/assets/3cb734d6-c6a0-4b77-8479-66c4d8ca7075)
 
 ### Step 3: Make the Mount Persistent
 To ensure the mount persists across reboots, update `/etc/fstab`:
@@ -497,7 +500,7 @@ sudo nano /etc/fstab
 Add the following line:
 
 ```
-172.31.1.101:/mnt/apps /var/www nfs defaults 0 0
+172.31.42.162:/mnt/apps /var/www nfs defaults 0 0
 ```
 
 Apply the changes:
@@ -506,7 +509,6 @@ Apply the changes:
 sudo systemctl daemon-reload
 sudo mount -a
 ```
-
 ---
 
 ## Installing PHP and Extensions
@@ -551,7 +553,6 @@ Explanation of Key Extensions:
 sudo systemctl start php-fpm
 sudo systemctl enable php-fpm
 ```
-
 ---
 
 ## Configuring SELinux
@@ -591,30 +592,46 @@ httpd_use_nfs --> on
 httpd_execmem --> on
 httpd_can_network_connect --> on
 ```
-
 ---
+Create PHP info page
+```
+sudo mkdir /var/www/html/
+sudo nano /vr/www/html/info.php
+```
+Then add the following
+```
+<?php
+phpinfo();
+?>
+```
+Then restart Apache to apply the changes
+
+Now access your web browser ```http://ypur-server-ip/info.php```
+
+If everything is configured well, you should see the php info page.
+
+![IMG-20250130-WA0055](https://github.com/user-attachments/assets/051ad8af-26a4-47af-a91b-3d243d412cc4)
 
 ## Deploying Tooling Website
 
 ### Step 1: Clone the Application Repository
 
 ```bash
-sudo git clone https://github.com/fmanimashaun/tooling.git
+sudo git clone https://github.com/Macbeth111/tooling.git
 ```
 
 ### Step 2: Import Database
 
 ```bash
 cd tooling
-sudo mysql -h 172.31.3.89 -u webaccess -p tooling < tooling-db.sql
+sudo mysql -h 172.31.45.189 -u webaccess -p tooling < tooling-db.sql
 ```
 
 ### Step 3: Add Admin User to Database
 
 ```bash
-sudo mysql -h 172.31.3.89 -u webaccess -p tooling
+sudo mysql -h 172.31.45.189 -u webaccess -p tooling
 ```
-
 Inside MySQL:
 ```sql
 INSERT INTO `users` (`username`, `password`, `email`, `user_type`, `status`)
@@ -622,15 +639,23 @@ VALUES ('myuser', MD5('password'), 'user@mail.com', 'admin', '1');
 ```
 
 ### Step 4: Update Database Connection in `function.php`
-
+Next you need to go into the tooling directory to ensure that the 'html' file is listed there.
+Then you copy the 'html' file to the '/var/www/' directory.
+then you go to the '/var/www/html/' to access the access the functions .php file in there and update it with the private ip for your database. 
 ```bash
-sudo nano /var/www/html/function.php
+cd tooling
+ls
+cp -R html /var/www/
+cd /var/www/html/
+sudo nano function.php
 ```
-
 Update:
 ```php
-$db = mysqli_connect('172.31.3.89', 'webaccess', 'Password.1', 'tooling');
+$db = mysqli_connect('172.31.45.189', 'webaccess', 'Password.1', 'tooling');
 ```
+![IMG-20250131-WA0003](https://github.com/user-attachments/assets/b909dfac-d3f1-4352-9ccf-dec86124c3ba)
+
+![image](https://github.com/user-attachments/assets/e2a56674-f67e-4c75-85e4-134978a7ddd6)
 
 ### Step 5: Restart Apache
 
@@ -641,20 +666,21 @@ sudo systemctl restart httpd
 ### Step 6: Access the Application
 
 Visit:
-
 ```
 http://<public-ip-of-webserver>/index.php
 ```
+![IMG-20250130-WA0049](https://github.com/user-attachments/assets/39b9494d-7bd6-4d23-9545-c814fb4962fa)
 
 Login using:
 - **Username:** myuser
 - **Password:** password
-
 ---
+![IMG-20250130-WA0053](https://github.com/user-attachments/assets/509968b4-350f-4e7c-8d90-090c51f5e1e5)
 
+### Lessons learned
+One of the biggest challenges I faced in deploying the DevOps tooling website was configuring the storage solutions across multiple AWS EC2 instances. Setting up the NFS server required a deep understanding of block storage management, logical volume management (LVM), and network file system (NFS) configurations. Initially, I encountered issues where the EBS volumes were not properly recognized by the instances, and some partitions failed to mount due to incorrect formatting. Through extensive troubleshooting, I learned to verify volume attachments using `lsblk`, properly initialize partitions with `gdisk`, and correctly format logical volumes with XFS. Additionally, configuring the security groups to allow NFS communication across instances posed a challenge, as misconfigured rules blocked file sharing. By systematically debugging network permissions and testing with `rpcinfo` and `exportfs`, I successfully enabled seamless communication between the NFS server and web servers.
 
-
-
+Another significant challenge was ensuring that the database and web servers communicated efficiently while maintaining security best practices. Initially, MySQL connectivity failed due to incorrect user privileges and firewall restrictions. By explicitly granting database access to the web server's IP and adjusting inbound rules to allow MySQL traffic on port 3306, I overcame this issue. Additionally, configuring PHP and Apache for seamless integration with the database required modifying configuration files and debugging connection errors within `function.php`. The experience taught me the importance of structured deployment—ensuring each component is properly set up before integrating it into the full architecture. Overall, I learned how to systematically troubleshoot infrastructure issues, optimize security while maintaining functionality, and document configurations effectively for future scalability.
 
 
 ---
